@@ -1,0 +1,17 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+airflow.db
+airflow.cfg
+logs/
+# Local datasets
+data/raw/
+
+# Environment variables and secrets
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+.venv/
