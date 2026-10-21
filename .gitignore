@@ -10,8 +10,52 @@ data/raw/
 
 # Environment variables and secrets
 .env
+.claude
+.env
+.env.*
+!.env.example
+sa-key.json
+ba882-team5-project.json
+**/ba882-team5-project.json__pycache__/
+*.pyc
+.venv/
+venv/
+airflow.db
+airflow.cfg
+logs/
+# Local datasets
+data/raw/
+
+# Environment variables and secrets
+.env
+.claude
+.env
+.env.*
+!.env.example
+sa-key.json
+ba882-team5-project.json
+**/ba882-team5-project.json
 
 # Python cache
 __pycache__/
 *.pyc
 .venv/
+ba882-team5-project.json
+# Astro generated files
+.astro/standalone/
+.astro/config.yaml.lock
+.astro/dag_integrity_exceptions.txt
+.astro/test_dag_integrity_default.py
+
+# Test DAGs
+dags/boston311_ingest_test.py
+dags/exampledag.py
+dags/test_dag.py
+
+# Local CSV and reports
+legacy_311_sample.csv
+new_311_sample.csv
+reports/311_values_full.txt
+
+# Other local files
+.yaml
