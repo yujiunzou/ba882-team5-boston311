@@ -1,7 +1,7 @@
-"""Boston 311 incremental ingestion (sandbox only).
+"""Boston 311 incremental ingestion.
 
 Fetch newly opened cases and rotate through unresolved cases from the current
-sandbox snapshot. Stage and MERGE into sandbox tables; never mutate raw tables.
+target tables. Stage and MERGE into the target tables; never mutate raw tables.
 Keep this DAG paused until a full DAG run and validation are successful.
 """
 
@@ -37,7 +37,7 @@ RESOURCES = {
         "date": "open_dt",
         "raw": "raw_legacy_311",
         "staging": "stg_legacy_311_incremental_v2",
-        "sandbox": "legacy_311_incremental_sandbox_v2",
+        "target": "legacy_311_incremental_sandbox_v2",
     },
     "new": {
         "resource_id": "254adca6-64ab-4c5c-9fc0-a6da622be185",
@@ -45,7 +45,7 @@ RESOURCES = {
         "date": "open_date",
         "raw": "raw_new_311",
         "staging": "stg_new_311_incremental_v2",
-        "sandbox": "new_311_incremental_sandbox_v2",
+        "target": "new_311_incremental_sandbox_v2",
     },
 }
 
@@ -120,10 +120,10 @@ def read_progress(client, project, system):
     dag_id="boston311_incremental",
     start_date=pendulum.datetime(2026, 10, 21, tz="America/New_York"),
     schedule="0 0 * * *",
-    catchup=False,
+    catchup=True,
     max_active_runs=1,
     default_args={"retries": 2, "retry_delay": timedelta(minutes=5)},
-    tags=["boston311", "incremental", "sandbox"],
+    tags=["boston311", "incremental"],
 )
 def boston311_incremental():
     @task
@@ -174,10 +174,10 @@ def boston311_incremental():
         project = os.environ["GCP_PROJECT"]
         bucket = os.environ["GCS_BUCKET"]
         client = bigquery.Client(project=project)
-        sandbox_id = f"{project}.{BQ_DATASET}.{cfg['sandbox']}"
+        target_id = f"{project}.{BQ_DATASET}.{cfg['target']}"
         try:
-            client.get_table(sandbox_id)
-            open_source = sandbox_id
+            client.get_table(target_id)
+            open_source = target_id
         except NotFound:
             open_source = f"{project}.{BQ_DATASET}.{cfg['raw']}"
 
@@ -233,14 +233,14 @@ def boston311_incremental():
         client = bigquery.Client(project=project)
         raw = f"{project}.{BQ_DATASET}.{cfg['raw']}"
         staging = f"{project}.{BQ_DATASET}.{cfg['staging']}"
-        sandbox = f"{project}.{BQ_DATASET}.{cfg['sandbox']}"
+        target = f"{project}.{BQ_DATASET}.{cfg['target']}"
         id_col = cfg["id"]
         raw_schema = client.get_table(raw).schema
         columns = [field.name for field in raw_schema]
         if id_col not in columns:
             raise ValueError(f"Missing {id_col} in raw schema")
-        # Sandbox must already exist; do not create a partial table from a daily delta.
-        client.get_table(sandbox)
+        # Target table must already exist; do not create a partial table from a daily delta.
+        client.get_table(target)
         suffix = re.sub(r"[^A-Za-z0-9_]", "_", get_current_context()["run_id"])[-70:]
         temp_tables = []
         try:
@@ -291,7 +291,7 @@ def boston311_incremental():
                 updates = ", ".join(f"T.`{col}` = S.`{col}`" for col in columns if col != id_col)
                 insert_values = ", ".join(f"S.`{col}`" for col in columns)
                 client.query(f"""
-                    MERGE `{sandbox}` T USING `{staging}` S
+                    MERGE `{target}` T USING `{staging}` S
                     ON T.`{id_col}` = S.`{id_col}`
                     WHEN MATCHED AND TO_JSON_STRING(T) != TO_JSON_STRING(S)
                         THEN UPDATE SET {updates}
@@ -299,7 +299,7 @@ def boston311_incremental():
                         INSERT ({quoted_columns}) VALUES ({insert_values})
                 """, location=BQ_LOCATION).result()
 
-            # Advance the cursor ONLY after all staging and sandbox operations succeeded.
+            # Advance the cursor ONLY after all staging and target operations succeeded.
             # If progress writing fails, replaying the batch is safe because MERGE is idempotent.
             next_cursor = open_result.get("last_case_id")
             if open_result["count"] > 0 and next_cursor is not None:
@@ -316,8 +316,8 @@ def boston311_incremental():
                     WHEN NOT MATCHED THEN INSERT (system, last_case_id, updated_at)
                         VALUES (S.system, S.last_case_id, CURRENT_TIMESTAMP())
                 """, job_config=config, location=BQ_LOCATION).result()
-            LOG.info("%s sandbox merge complete; cursor=%s", system, next_cursor)
-            return {"system": system, "sandbox": sandbox, "cursor": next_cursor}
+            LOG.info("%s target merge complete; cursor=%s", system, next_cursor)
+            return {"system": system, "target": target, "cursor": next_cursor}
         finally:
             for _, temp in temp_tables:
                 client.delete_table(temp, not_found_ok=True)
@@ -325,7 +325,7 @@ def boston311_incremental():
     for system in ("legacy", "new"):
         newly_opened = extract_new.override(task_id=f"extract_{system}_new_cases")(system)
         unresolved = extract_open.override(task_id=f"extract_{system}_open_cases")(system)
-        stage_and_merge.override(task_id=f"stage_merge_{system}_sandbox")(
+        stage_and_merge.override(task_id=f"stage_merge_{system}")(
             system, newly_opened, unresolved
         )
 
