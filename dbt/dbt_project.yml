@@ -1,0 +1,16 @@
+name: 'boston311'
+version: '1.0.0'
+config-version: 2
+
+profile: 'boston311'
+
+model-paths: ["models"]
+
+models:
+  boston311:
+    staging:
+      +materialized: table
+    intermediate:
+      +materialized: view
+    marts:
+      +materialized: table
