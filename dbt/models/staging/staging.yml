@@ -37,27 +37,3 @@ models:
         description: Timestamp when the record was loaded into BigQuery.
         data_tests:
           - not_null
-
-  # 3. Service Categories
-  - name: stg_service_categories
-    description: >
-      Distinct service category combinations from
-      the legacy and new Boston 311 systems.
-
-    columns:
-      - name: system
-        description: Identifies the legacy or new 311 system.
-        data_tests:
-          - not_null
-          - accepted_values:
-              values: ['Legacy', 'New']
-
-      - name: category_level_1
-        description: Main service category.
-
-      - name: category_level_2
-        description: Secondary category, when available.
-
-      - name: service_type
-        description: Specific Boston 311 service type.
-
