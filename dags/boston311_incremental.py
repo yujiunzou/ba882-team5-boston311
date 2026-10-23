@@ -154,7 +154,7 @@ def save_to_gcs(system, run_date, name, rows):
 @dag(
     dag_id="boston311_incremental",
     schedule="0 12 * * 1",  # Mondays 12:00 Boston time
-    start_date=pendulum.datetime(2026, 10, 26, 12, tz=LOCAL_TZ),
+    start_date=pendulum.datetime(2026, 10, 19, 12, tz=LOCAL_TZ),
     catchup=False,  # history comes from boston311_backfill
     max_active_runs=1,
     default_args={"retries": 3, "retry_delay": timedelta(seconds=30)},
