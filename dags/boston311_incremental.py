@@ -1,333 +1,290 @@
-"""Boston 311 incremental ingestion.
+"""
+Boston 311 incremental load (weekly)
 
-Fetch newly opened cases and rotate through unresolved cases from the current
-target tables. Stage and MERGE into the target tables; never mutate raw tables.
-Keep this DAG paused until a full DAG run and validation are successful.
+Every Monday, for each system (legacy, new):
+    1. create table   -> make sure the raw table exists
+    2. extract new    -> cases opened in the past week (plus 3 extra days, because
+                         the city publishes some cases late)
+    3. extract open   -> cases still open in our raw table, fetched again so
+                         status changes are picked up
+    4. load           -> append both files to the raw table
+
+Rows are only appended. dbt keeps the latest version of each case.
+Run boston311_backfill once before turning this DAG on.
 """
 
 import json
-import logging
 import os
-import re
 import time
 from datetime import timedelta
 
 import pendulum
 import requests
-from airflow.sdk import dag, get_current_context, task
-from google.api_core.exceptions import NotFound
+from airflow.sdk import dag, task
 from google.cloud import bigquery, storage
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-LOG = logging.getLogger(__name__)
-API_URL = "https://data.boston.gov/api/3/action/datastore_search_sql"
-BQ_DATASET = "boston311"
-BQ_LOCATION = "us-central1"
-PAGE_SIZE = 100
-BATCH_SIZE = 100
-REQUEST_DELAY_SECONDS = 0.2
-OPEN_CASE_LIMIT = 1000  # Rotate this many unresolved cases per system per run.
-PROGRESS_TABLE = "incremental_refresh_progress"
+# ==================================================
+# 1. Configuration (set in .env)
+# ==================================================
 
-RESOURCES = {
+GCP_PROJECT = os.environ["GCP_PROJECT"]
+GCS_BUCKET = os.environ["GCS_BUCKET"]
+BQ_DATASET = os.environ.get("BQ_DATASET", "boston311")
+BQ_LOCATION = os.environ.get("BQ_LOCATION", "us-central1")
+# GOOGLE_APPLICATION_CREDENTIALS in .env points to the key file.
+
+SQL_API_URL = "https://data.boston.gov/api/3/action/datastore_search_sql"
+LOCAL_TZ = "America/New_York"  # both systems store Boston local time
+
+WINDOW_DAYS = 7      # one week per run
+LOOKBACK_DAYS = 3    # extra days to catch late-published cases
+PAGE_SIZE = 1000     # rows per API request for new cases
+ID_BATCH_SIZE = 200  # case IDs per API request for open cases
+REQUEST_DELAY = 0.2  # seconds between API requests
+
+# Raw tables keep every column as STRING.
+LEGACY_COLUMNS = [
+    "case_enquiry_id", "open_dt", "sla_target_dt", "closed_dt", "on_time",
+    "case_status", "closure_reason", "case_title", "subject", "reason", "type",
+    "queue", "department", "submitted_photo", "closed_photo", "location",
+    "fire_district", "pwd_district", "city_council_district", "police_district",
+    "neighborhood", "neighborhood_services_district", "ward", "precinct",
+    "location_street_name", "location_zipcode", "latitude", "longitude",
+    "geom_4326", "source",
+]
+
+NEW_COLUMNS = [
+    "case_id", "open_date", "case_topic", "service_name", "assigned_department",
+    "assigned_team", "case_status", "closure_reason", "closure_comments",
+    "close_date", "target_close_date", "on_time", "report_source",
+    "full_address", "street_number", "street_name", "zip_code", "neighborhood",
+    "public_works_district", "city_council_district", "fire_district",
+    "police_district", "ward", "precinct", "submitted_photo", "closed_photo",
+    "longitude", "latitude",
+]
+
+# _loaded_at: when the row was loaded (set by BigQuery)
+# _source:    where the row came from: "api_new" or "api_open" in this DAG
+METADATA_DDL = """
+    _loaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP(),
+    _source    STRING
+"""
+
+SYSTEMS = {
     "legacy": {
-        "resource_id": "1a0b420d-99f1-4887-9851-990b2a5a6e17",
+        # The city starts a new legacy file each year; update this ID in January.
+        "resource_id": "1a0b420d-99f1-4887-9851-990b2a5a6e17",  # 2026 file
+        "table": "raw_legacy_311",
         "id": "case_enquiry_id",
         "date": "open_dt",
-        "raw": "raw_legacy_311",
-        "staging": "stg_legacy_311_incremental_v2",
-        "target": "legacy_311_incremental_sandbox_v2",
+        "columns": LEGACY_COLUMNS,
+        # Open cases can only be re-fetched from the current file,
+        # so older years are left out of the open-case refresh.
+        "refresh_sources": ["backfill_legacy_2026", "api_new", "api_open"],
     },
     "new": {
         "resource_id": "254adca6-64ab-4c5c-9fc0-a6da622be185",
+        "table": "raw_new_311",
         "id": "case_id",
         "date": "open_date",
-        "raw": "raw_new_311",
-        "staging": "stg_new_311_incremental_v2",
-        "target": "new_311_incremental_sandbox_v2",
+        "columns": NEW_COLUMNS,
+        "refresh_sources": ["backfill_new_system", "api_new", "api_open"],
     },
 }
 
 
-def session_with_retry():
+# ==================================================
+# 2. Helpers
+# ==================================================
+
+def table_id(name):
+    return f"{GCP_PROJECT}.{BQ_DATASET}.{name}"
+
+
+def api_session():
+    """Requests session that retries on temporary API errors."""
     session = requests.Session()
-    retry = Retry(
-        total=4,
-        backoff_factor=1,
-        status_forcelist=[429, 500, 502, 503, 504],
-        allowed_methods=["GET"],
-    )
-    adapter = HTTPAdapter(max_retries=retry)
-    session.mount("https://", adapter)
+    retry = Retry(total=4, backoff_factor=1,
+                  status_forcelist=[429, 500, 502, 503, 504], allowed_methods=["GET"])
+    session.mount("https://", HTTPAdapter(max_retries=retry))
     return session
 
 
-def escape_sql_string(value):
-    return str(value).replace("'", "''")
-
-
-def fetch_sql(session, sql):
-    response = session.get(API_URL, params={"sql": sql}, timeout=90)
+def run_sql(session, sql):
+    """Run one SQL query against the city's data API and return the rows."""
+    response = session.get(SQL_API_URL, params={"sql": sql}, timeout=90)
     response.raise_for_status()
     payload = response.json()
     if not payload.get("success"):
-        raise RuntimeError(f"Boston CKAN query failed: {payload.get('error')}")
-    return payload.get("result", {}).get("records", [])
+        raise RuntimeError(f"City API query failed: {payload.get('error')}")
+    return payload["result"]["records"]
 
 
-def clean_records(records):
-    return [
-        {key: (None if value is None else str(value)) for key, value in record.items()
-         if key not in ("_id", "_full_text")}
-        for record in records
-    ]
+def clean(rows, columns, source):
+    """Keep only the expected columns, as strings, and tag each row."""
+    cleaned = []
+    for row in rows:
+        record = {c: (None if row.get(c) in (None, "") else str(row.get(c))) for c in columns}
+        record["_source"] = source
+        cleaned.append(record)
+    return cleaned
 
 
-def save_gcs(project, bucket, system, label, records):
-    run_id = get_current_context()["run_id"]
-    safe_run_id = re.sub(r"[^A-Za-z0-9_.-]", "_", run_id)
-    path = f"incremental/v3/{system}/{safe_run_id}/{label}.jsonl"
-    data = "".join(json.dumps(record, ensure_ascii=False) + "\n" for record in records)
-    storage.Client(project=project).bucket(bucket).blob(path).upload_from_string(
-        data, content_type="application/x-ndjson"
+def save_to_gcs(system, run_date, name, rows):
+    """Write rows as newline-delimited JSON to GCS. Returns the gs:// path, or None if empty."""
+    if not rows:
+        print(f"{system} {name}: no rows, nothing to save")
+        return None
+    path = f"boston311/raw/{system}/date={run_date}/{name}.json"
+    data = "\n".join(json.dumps(r, ensure_ascii=False) for r in rows)
+    storage.Client(project=GCP_PROJECT).bucket(GCS_BUCKET).blob(path).upload_from_string(
+        data, content_type="application/json"
     )
-    uri = f"gs://{bucket}/{path}"
-    LOG.info("Uploaded %d %s/%s records to %s", len(records), system, label, uri)
-    return {"gcs_uri": uri, "count": len(records), "system": system, "label": label}
+    uri = f"gs://{GCS_BUCKET}/{path}"
+    print(f"{system} {name}: {len(rows)} rows -> {uri}")
+    return uri
 
 
-def progress_table_id(project):
-    return f"{project}.{BQ_DATASET}.{PROGRESS_TABLE}"
-
-
-def read_progress(client, project, system):
-    query = f"""
-        SELECT last_case_id
-        FROM `{progress_table_id(project)}`
-        WHERE system = @system
-        ORDER BY updated_at DESC
-        LIMIT 1
-    """
-    job_config = bigquery.QueryJobConfig(query_parameters=[
-        bigquery.ScalarQueryParameter("system", "STRING", system)
-    ])
-    rows = list(client.query(query, job_config=job_config, location=BQ_LOCATION).result())
-    return rows[0].last_case_id if rows else None
-
+# ==================================================
+# 3. DAG
+# ==================================================
 
 @dag(
     dag_id="boston311_incremental",
-    start_date=pendulum.datetime(2026, 10, 21, tz="America/New_York"),
-    schedule="0 0 * * *",
-    catchup=True,
+    schedule="0 12 * * 1",  # Mondays 12:00 Boston time
+    start_date=pendulum.datetime(2026, 10, 19, 12, tz=LOCAL_TZ),
+    catchup=False,  # history comes from boston311_backfill
     max_active_runs=1,
-    default_args={"retries": 2, "retry_delay": timedelta(minutes=5)},
+    default_args={"retries": 3, "retry_delay": timedelta(seconds=30)},
     tags=["boston311", "incremental"],
 )
 def boston311_incremental():
+
     @task
-    def extract_new(system):
-        cfg = RESOURCES[system]
-        project = os.environ["GCP_PROJECT"]
-        bucket = os.environ["GCS_BUCKET"]
-        context = get_current_context()
-        # Use the completed daily interval, not the run's wall-clock time.
-        # Half-open bounds prevent overlap at day boundaries.
-        interval_start = context["data_interval_start"]
-        interval_end = context["data_interval_end"]
-        # Some Airflow 3 timetables expose a zero-length daily interval.
-        # Fall back to the preceding New York calendar day in that case.
-        if interval_start >= interval_end:
-            interval_start = interval_end.in_timezone("America/New_York").subtract(days=1)
-        start = interval_start.in_timezone("UTC").format("YYYY-MM-DD HH:mm:ss")
-        end = interval_end.in_timezone("UTC").format("YYYY-MM-DD HH:mm:ss")
-        records = []
-        seen = set()
-        with session_with_retry() as session:
+    def create_raw_table(system):
+        """Create the raw table if it doesn't exist."""
+        cfg = SYSTEMS[system]
+        columns_ddl = ",\n".join(f"    {c} STRING" for c in cfg["columns"])
+        bigquery.Client(project=GCP_PROJECT).query(f"""
+            CREATE TABLE IF NOT EXISTS `{table_id(cfg['table'])}` (
+            {columns_ddl},
+            {METADATA_DDL}
+            )
+        """, location=BQ_LOCATION).result()
+        print(f"{table_id(cfg['table'])} ready")
+
+    @task
+    def extract_new_cases(system, data_interval_end=None):
+        """Cases opened in the past week plus the lookback days."""
+        cfg = SYSTEMS[system]
+
+        # Window in Boston local time, because that's how both systems store dates
+        end = data_interval_end.in_timezone(LOCAL_TZ)
+        start = end.subtract(days=WINDOW_DAYS + LOOKBACK_DAYS)
+        start_str = start.format("YYYY-MM-DD HH:mm:ss")
+        end_str = end.format("YYYY-MM-DD HH:mm:ss")
+        run_date = end.format("YYYY-MM-DD")
+        print(f"{system}: cases opened {start_str} to {end_str}")
+
+        rows = []
+        with api_session() as session:
             offset = 0
             while True:
-                sql = (
+                page = run_sql(session, (
                     f'SELECT * FROM "{cfg["resource_id"]}" '
-                    f'WHERE "{cfg["date"]}" >= \'{escape_sql_string(start)}\' '
-                    f'AND "{cfg["date"]}" < \'{escape_sql_string(end)}\' '
-                    f'ORDER BY "{cfg["date"]}" DESC, "{cfg["id"]}" DESC '
-                    f'LIMIT {PAGE_SIZE} OFFSET {offset}'
-                )
-                page = clean_records(fetch_sql(session, sql))
-                LOG.info("%s new offset %d: %d", system, offset, len(page))
-                for row in page:
-                    case_id = row.get(cfg["id"])
-                    if not case_id or case_id in seen:
-                        raise ValueError(f"{system} new cases missing or duplicate ID: {case_id}")
-                    seen.add(case_id)
-                records.extend(page)
+                    f'WHERE "{cfg["date"]}" >= \'{start_str}\' AND "{cfg["date"]}" < \'{end_str}\' '
+                    f'ORDER BY "{cfg["id"]}" LIMIT {PAGE_SIZE} OFFSET {offset}'
+                ))
+                rows.extend(page)
                 if len(page) < PAGE_SIZE:
                     break
                 offset += PAGE_SIZE
-                time.sleep(REQUEST_DELAY_SECONDS)
-        return save_gcs(project, bucket, system, "new", records)
+                time.sleep(REQUEST_DELAY)
+
+        return save_to_gcs(system, run_date, "api_new", clean(rows, cfg["columns"], "api_new"))
 
     @task
-    def extract_open(system):
-        cfg = RESOURCES[system]
-        project = os.environ["GCP_PROJECT"]
-        bucket = os.environ["GCS_BUCKET"]
-        client = bigquery.Client(project=project)
-        target_id = f"{project}.{BQ_DATASET}.{cfg['target']}"
-        try:
-            client.get_table(target_id)
-            open_source = target_id
-        except NotFound:
-            open_source = f"{project}.{BQ_DATASET}.{cfg['raw']}"
+    def extract_open_cases(system, data_interval_end=None):
+        """Every case whose latest version in the raw table is not closed."""
+        cfg = SYSTEMS[system]
+        run_date = data_interval_end.in_timezone(LOCAL_TZ).format("YYYY-MM-DD")
+        sources = ", ".join(f"'{s}'" for s in cfg["refresh_sources"])
 
-        cursor = read_progress(client, project, system)
-        if not isinstance(OPEN_CASE_LIMIT, int) or OPEN_CASE_LIMIT < 1:
-            raise ValueError("OPEN_CASE_LIMIT must be a positive integer")
+        # Step 1: find open case IDs (latest version of each case only)
+        query = f"""
+            SELECT case_id FROM (
+                SELECT {cfg['id']} AS case_id, case_status,
+                       ROW_NUMBER() OVER (PARTITION BY {cfg['id']} ORDER BY _loaded_at DESC) AS rn
+                FROM `{table_id(cfg['table'])}`
+                WHERE _source IN ({sources})
+            )
+            WHERE rn = 1 AND LOWER(TRIM(IFNULL(case_status, ''))) != 'closed'
+        """
+        client = bigquery.Client(project=GCP_PROJECT)
+        ids = [r.case_id for r in client.query(query, location=BQ_LOCATION).result()]
+        print(f"{system}: {len(ids)} open cases to re-check")
 
-        def select_ids(after_id):
-            extra = "AND CAST(`{}` AS STRING) > @cursor".format(cfg["id"]) if after_id is not None else ""
-            sql = f"""
-                SELECT DISTINCT CAST(`{cfg['id']}` AS STRING) AS case_id
-                FROM `{open_source}`
-                WHERE `{cfg['id']}` IS NOT NULL
-                  AND TRIM(CAST(`{cfg['id']}` AS STRING)) != ''
-                  AND (case_status IS NULL OR LOWER(TRIM(case_status)) != 'closed')
-                  {extra}
-                ORDER BY case_id
-                LIMIT {OPEN_CASE_LIMIT}
-            """
-            params = ([bigquery.ScalarQueryParameter("cursor", "STRING", after_id)]
-                      if after_id is not None else [])
-            config = bigquery.QueryJobConfig(query_parameters=params)
-            return [r.case_id for r in client.query(sql, job_config=config, location=BQ_LOCATION).result()]
+        # Step 2: fetch their current version from the API, in batches
+        rows = []
+        missing = 0
+        with api_session() as session:
+            for i in range(0, len(ids), ID_BATCH_SIZE):
+                batch = ids[i:i + ID_BATCH_SIZE]
+                id_list = ", ".join(f"'{x}'" for x in batch)
+                page = run_sql(session, (
+                    f'SELECT * FROM "{cfg["resource_id"]}" WHERE "{cfg["id"]}" IN ({id_list})'
+                ))
+                missing += len(batch) - len(page)
+                rows.extend(page)
+                time.sleep(REQUEST_DELAY)
 
-        ids = select_ids(cursor)
-        if not ids and cursor is not None:
-            ids = select_ids(None)
-        LOG.info("%s unresolved selected=%d previous_cursor=%s", system, len(ids), cursor)
-        records = []
-        with session_with_retry() as session:
-            for offset in range(0, len(ids), BATCH_SIZE):
-                batch = ids[offset:offset + BATCH_SIZE]
-                values = ", ".join(f"'{escape_sql_string(x)}'" for x in batch)
-                sql = (f'SELECT * FROM "{cfg["resource_id"]}" '
-                       f'WHERE "{cfg["id"]}" IN ({values}) LIMIT {len(batch) + 1}')
-                page = clean_records(fetch_sql(session, sql))
-                returned = [row.get(cfg["id"]) for row in page]
-                if len(returned) != len(batch) or set(returned) != set(batch):
-                    raise ValueError(
-                        f"{system} unresolved batch incomplete: "
-                        f"missing={sorted(set(batch) - set(returned))[:10]}"
-                    )
-                records.extend(page)
-                time.sleep(REQUEST_DELAY_SECONDS)
-        result = save_gcs(project, bucket, system, "open", records)
-        result["last_case_id"] = ids[-1] if ids else cursor
-        return result
+        # A case can disappear from the city's file (e.g. moved to the new system).
+        # Log it and keep going instead of failing the whole run.
+        if missing:
+            print(f"{system}: {missing} open cases were not returned by the API")
+
+        return save_to_gcs(system, run_date, "api_open", clean(rows, cfg["columns"], "api_open"))
 
     @task
-    def stage_and_merge(system, new_result, open_result):
-        cfg = RESOURCES[system]
-        project = os.environ["GCP_PROJECT"]
-        client = bigquery.Client(project=project)
-        raw = f"{project}.{BQ_DATASET}.{cfg['raw']}"
-        staging = f"{project}.{BQ_DATASET}.{cfg['staging']}"
-        target = f"{project}.{BQ_DATASET}.{cfg['target']}"
-        id_col = cfg["id"]
-        raw_schema = client.get_table(raw).schema
-        columns = [field.name for field in raw_schema]
-        if id_col not in columns:
-            raise ValueError(f"Missing {id_col} in raw schema")
-        # Target table must already exist; do not create a partial table from a daily delta.
-        client.get_table(target)
-        suffix = re.sub(r"[^A-Za-z0-9_]", "_", get_current_context()["run_id"])[-70:]
-        temp_tables = []
-        try:
-            for result in (new_result, open_result):
-                if result["system"] != system:
-                    raise ValueError("Unexpected system in task input")
-                if result["count"] == 0:
-                    continue
-                temp = f"{project}.{BQ_DATASET}._inc_{system}_{result['label']}_{suffix}"
-                job = client.load_table_from_uri(
-                    result["gcs_uri"], temp,
-                    job_config=bigquery.LoadJobConfig(
-                        schema=raw_schema,
-                        source_format=bigquery.SourceFormat.NEWLINE_DELIMITED_JSON,
-                        write_disposition=bigquery.WriteDisposition.WRITE_TRUNCATE,
-                        ignore_unknown_values=False,
-                    ),
-                    location=BQ_LOCATION,
-                )
-                job.result()
-                actual = client.get_table(temp).num_rows
-                if actual != result["count"]:
-                    raise ValueError(f"{system} {result['label']} count mismatch {actual} != {result['count']}")
-                temp_tables.append((result["label"], temp))
+    def load_to_raw(system, gcs_uri):
+        """Append a GCS file to the raw table."""
+        if gcs_uri is None:
+            print("no file to load, skipping")
+            return
 
-            if temp_tables:
-                union_sql = " UNION ALL ".join(
-                    f"SELECT t.*, {2 if label == 'open' else 1} AS _priority FROM `{table}` t"
-                    for label, table in temp_tables
-                )
-                duplicate_sql = f"""
-                    WITH input AS ({union_sql})
-                    SELECT `{id_col}`, _priority, COUNT(*) n
-                    FROM input GROUP BY 1, 2 HAVING COUNT(*) > 1 LIMIT 1
-                """
-                if list(client.query(duplicate_sql, location=BQ_LOCATION).result()):
-                    raise ValueError(f"{system}: duplicate IDs within one source")
-                quoted_columns = ", ".join(f"`{col}`" for col in columns)
-                client.query(f"""
-                    CREATE OR REPLACE TABLE `{staging}` AS
-                    WITH input AS ({union_sql})
-                    SELECT {quoted_columns}
-                    FROM input
-                    QUALIFY ROW_NUMBER() OVER (
-                        PARTITION BY `{id_col}` ORDER BY _priority DESC
-                    ) = 1
-                """, location=BQ_LOCATION).result()
-                updates = ", ".join(f"T.`{col}` = S.`{col}`" for col in columns if col != id_col)
-                insert_values = ", ".join(f"S.`{col}`" for col in columns)
-                client.query(f"""
-                    MERGE `{target}` T USING `{staging}` S
-                    ON T.`{id_col}` = S.`{id_col}`
-                    WHEN MATCHED AND TO_JSON_STRING(T) != TO_JSON_STRING(S)
-                        THEN UPDATE SET {updates}
-                    WHEN NOT MATCHED THEN
-                        INSERT ({quoted_columns}) VALUES ({insert_values})
-                """, location=BQ_LOCATION).result()
+        cfg = SYSTEMS[system]
+        schema = [bigquery.SchemaField(c, "STRING") for c in cfg["columns"]]
+        schema.append(bigquery.SchemaField("_source", "STRING"))
 
-            # Advance the cursor ONLY after all staging and target operations succeeded.
-            # If progress writing fails, replaying the batch is safe because MERGE is idempotent.
-            next_cursor = open_result.get("last_case_id")
-            if open_result["count"] > 0 and next_cursor is not None:
-                config = bigquery.QueryJobConfig(query_parameters=[
-                    bigquery.ScalarQueryParameter("system", "STRING", system),
-                    bigquery.ScalarQueryParameter("cursor", "STRING", next_cursor),
-                ])
-                client.query(f"""
-                    MERGE `{progress_table_id(project)}` T
-                    USING (SELECT @system AS system, @cursor AS last_case_id) S
-                    ON T.system = S.system
-                    WHEN MATCHED THEN UPDATE SET
-                        last_case_id = S.last_case_id, updated_at = CURRENT_TIMESTAMP()
-                    WHEN NOT MATCHED THEN INSERT (system, last_case_id, updated_at)
-                        VALUES (S.system, S.last_case_id, CURRENT_TIMESTAMP())
-                """, job_config=config, location=BQ_LOCATION).result()
-            LOG.info("%s target merge complete; cursor=%s", system, next_cursor)
-            return {"system": system, "target": target, "cursor": next_cursor}
-        finally:
-            for _, temp in temp_tables:
-                client.delete_table(temp, not_found_ok=True)
-
-    for system in ("legacy", "new"):
-        newly_opened = extract_new.override(task_id=f"extract_{system}_new_cases")(system)
-        unresolved = extract_open.override(task_id=f"extract_{system}_open_cases")(system)
-        stage_and_merge.override(task_id=f"stage_merge_{system}")(
-            system, newly_opened, unresolved
+        job = bigquery.Client(project=GCP_PROJECT).load_table_from_uri(
+            gcs_uri,
+            table_id(cfg["table"]),
+            job_config=bigquery.LoadJobConfig(
+                schema=schema,
+                source_format=bigquery.SourceFormat.NEWLINE_DELIMITED_JSON,
+                write_disposition=bigquery.WriteDisposition.WRITE_APPEND,
+                ignore_unknown_values=False,
+            ),
+            location=BQ_LOCATION,
         )
+        job.result()
+        print(f"loaded {job.output_rows} rows into {table_id(cfg['table'])}")
+
+    # ==================================================
+    # 4. Task dependencies
+    # ==================================================
+
+    for system in SYSTEMS:
+        ready = create_raw_table.override(task_id=f"create_{system}_raw_table")(system)
+
+        new_file = extract_new_cases.override(task_id=f"extract_{system}_new_cases")(system)
+        open_file = extract_open_cases.override(task_id=f"extract_{system}_open_cases")(system)
+        ready >> [new_file, open_file]
+
+        load_to_raw.override(task_id=f"load_{system}_new_cases")(system, new_file)
+        load_to_raw.override(task_id=f"load_{system}_open_cases")(system, open_file)
 
 
 boston311_incremental()

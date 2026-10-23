@@ -59,3 +59,4 @@ reports/311_values_full.txt
 
 # Other local files
 .yaml
+include/gcp/
