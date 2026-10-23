@@ -9,7 +9,7 @@ model-paths: ["models"]
 models:
   boston311:
     staging:
-      +materialized: table
+      +materialized: view
     intermediate:
       +materialized: view
     marts:
