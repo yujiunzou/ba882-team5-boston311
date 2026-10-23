@@ -1,0 +1,48 @@
+version: 2
+
+models:
+  - name: int_service_requests_unified
+    description: >
+      One row per service request across the legacy and new 311 systems,
+      with shared column names and shared business fields.
+    columns:
+      - name: service_request_key
+        description: source_system + ':' + case_id. Unique across both systems.
+        data_tests:
+          - unique
+          - not_null
+      - name: source_system
+        description: Which 311 system the case comes from.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['legacy', 'new']
+      - name: case_id
+        description: Case ID within its own system (legacy case_enquiry_id or new case_id).
+        data_tests:
+          - not_null
+      - name: status_group
+        description: "'closed' if case_status is closed, otherwise 'open'."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['open', 'closed']
+      - name: is_status_current
+        description: >
+          False for legacy cases whose latest row is from the 2024/2025 backfill.
+          Their open statuses are a snapshot and are not refreshed weekly.
+        data_tests:
+          - not_null
+      - name: opened_at
+        description: When the case was opened (Boston local time).
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: resolution_hours
+        description: Hours from opened_at to closed_at, closed cases only.
+      - name: is_overdue
+        description: >
+          Closed: closed_at > target_close_at. Open: now > target_close_at, only when
+          is_status_current. NULL when there is no target or the status is not current.
