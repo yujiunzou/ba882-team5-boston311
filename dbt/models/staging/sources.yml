@@ -1,22 +1,21 @@
+
 version: 2
 
 sources:
   - name: boston311_raw
+    description: Raw Boston 311 data loaded by Airflow.
     database: ba882-team5-project
     schema: boston311
+
     tables:
       - name: raw_legacy_311
-        description: "Original Boston 311 Legacy System data (30 columns)."
         columns:
           - name: case_enquiry_id
             data_tests:
               - not_null
-              - unique
 
       - name: raw_new_311
-        description: "Original Boston 311 New System data (28 columns)."
         columns:
           - name: case_id
             data_tests:
               - not_null
-              - unique

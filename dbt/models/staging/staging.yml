@@ -1,0 +1,63 @@
+
+version: 2
+
+models:
+  # 1. Legacy Boston 311 System
+  - name: stg_legacy_311
+    description: >
+      Cleaned legacy Boston 311 data.
+      One row per case, keeping the latest loaded record.
+
+    columns:
+      - name: case_enquiry_id
+        description: Unique case identifier in the legacy system.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: _loaded_at
+        description: Timestamp when the record was loaded into BigQuery.
+        data_tests:
+          - not_null
+
+  # 2. New Boston 311 System
+  - name: stg_new_311
+    description: >
+      Cleaned new Boston 311 data.
+      One row per case, keeping the latest loaded record.
+
+    columns:
+      - name: case_id
+        description: Unique case identifier in the new system.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: _loaded_at
+        description: Timestamp when the record was loaded into BigQuery.
+        data_tests:
+          - not_null
+
+  # 3. Service Categories
+  - name: stg_service_categories
+    description: >
+      Distinct service category combinations from
+      the legacy and new Boston 311 systems.
+
+    columns:
+      - name: system
+        description: Identifies the legacy or new 311 system.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['Legacy', 'New']
+
+      - name: category_level_1
+        description: Main service category.
+
+      - name: category_level_2
+        description: Secondary category, when available.
+
+      - name: service_type
+        description: Specific Boston 311 service type.
+
