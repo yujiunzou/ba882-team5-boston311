@@ -1,40 +1,61 @@
-WITH source AS (
-    SELECT *
-    FROM {{ source('boston311_raw', 'raw_new_311') }}
+with raw_data as (
+    select *
+    from {{ source('boston311_raw', 'raw_new_311') }}
+),
+
+ranked as (
+    select
+        raw_data.*,
+        row_number() over (
+            partition by nullif(trim(case_id), '')
+            order by
+                _loaded_at desc nulls last,
+                _source desc,
+                to_json_string(raw_data) desc
+        ) as _row_num
+    from raw_data
+    where nullif(trim(case_id), '') is not null
+),
+
+latest as (
+    select * except (_row_num)
+    from ranked
+    where _row_num = 1
 )
 
-SELECT
-    NULLIF(TRIM(case_id), '') AS case_id,
+select
+    nullif(trim(case_id), '') as case_id,
 
-    SAFE_CAST(NULLIF(TRIM(open_date), '') AS TIMESTAMP) AS open_date,
-    NULLIF(TRIM(case_topic), '') AS case_topic,
-    NULLIF(TRIM(service_name), '') AS service_name,
-    NULLIF(TRIM(assigned_department), '') AS assigned_department,
-    NULLIF(TRIM(assigned_team), '') AS assigned_team,
-    NULLIF(TRIM(case_status), '') AS case_status,
-    NULLIF(TRIM(closure_reason), '') AS closure_reason,
-    NULLIF(TRIM(closure_comments), '') AS closure_comments,
+    -- The city's '+00' suffix is misleading according to PR #5.
+    -- Remove it before casting to Boston-local DATETIME (no timezone shift).
+    safe_cast(regexp_replace(nullif(trim(open_date), ''), r'(Z|\+00(?::?00)?)$', '') as datetime) as open_date,
+    nullif(trim(case_topic), '') as case_topic,
+    nullif(trim(service_name), '') as service_name,
+    nullif(trim(assigned_department), '') as assigned_department,
+    nullif(trim(assigned_team), '') as assigned_team,
+    lower(nullif(trim(case_status), '')) as case_status,
+    nullif(trim(closure_reason), '') as closure_reason,
+    nullif(trim(closure_comments), '') as closure_comments,
+    safe_cast(regexp_replace(nullif(trim(close_date), ''), r'(Z|\+00(?::?00)?)$', '') as datetime) as close_date,
+    safe_cast(regexp_replace(nullif(trim(target_close_date), ''), r'(Z|\+00(?::?00)?)$', '') as datetime) as target_close_date,
+    upper(nullif(trim(on_time), '')) as on_time,
+    nullif(trim(report_source), '') as report_source,
+    nullif(trim(full_address), '') as full_address,
+    nullif(trim(street_number), '') as street_number,
+    nullif(trim(street_name), '') as street_name,
+    nullif(trim(zip_code), '') as zip_code,
+    nullif(trim(neighborhood), '') as neighborhood,
+    nullif(trim(public_works_district), '') as public_works_district,
+    nullif(trim(city_council_district), '') as city_council_district,
+    nullif(trim(fire_district), '') as fire_district,
+    nullif(trim(police_district), '') as police_district,
+    nullif(trim(ward), '') as ward,
+    nullif(trim(precinct), '') as precinct,
+    nullif(trim(submitted_photo), '') as submitted_photo,
+    nullif(trim(closed_photo), '') as closed_photo,
+    safe_cast(nullif(trim(longitude), '') as float64) as longitude,
+    safe_cast(nullif(trim(latitude), '') as float64) as latitude,
 
-    SAFE_CAST(NULLIF(TRIM(close_date), '') AS TIMESTAMP) AS close_date,
-    SAFE_CAST(NULLIF(TRIM(target_close_date), '') AS TIMESTAMP) AS target_close_date,
-
-    NULLIF(TRIM(on_time), '') AS on_time,
-    NULLIF(TRIM(report_source), '') AS report_source,
-    NULLIF(TRIM(full_address), '') AS full_address,
-    NULLIF(TRIM(street_number), '') AS street_number,
-    NULLIF(TRIM(street_name), '') AS street_name,
-    NULLIF(TRIM(zip_code), '') AS zip_code,
-    NULLIF(TRIM(neighborhood), '') AS neighborhood,
-    NULLIF(TRIM(public_works_district), '') AS public_works_district,
-    NULLIF(TRIM(city_council_district), '') AS city_council_district,
-    NULLIF(TRIM(fire_district), '') AS fire_district,
-    NULLIF(TRIM(police_district), '') AS police_district,
-    NULLIF(TRIM(ward), '') AS ward,
-    NULLIF(TRIM(precinct), '') AS precinct,
-    NULLIF(TRIM(submitted_photo), '') AS submitted_photo,
-    NULLIF(TRIM(closed_photo), '') AS closed_photo,
-
-    SAFE_CAST(NULLIF(TRIM(longitude), '') AS FLOAT64) AS longitude,
-    SAFE_CAST(NULLIF(TRIM(latitude), '') AS FLOAT64) AS latitude
-
-FROM source
+    _loaded_at,
+    _source
+from latest
