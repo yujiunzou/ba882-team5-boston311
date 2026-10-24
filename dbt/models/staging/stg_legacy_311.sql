@@ -21,6 +21,8 @@ latest as (
     select * except (_row_num)
     from ranked
     where _row_num = 1
+      -- exclude the city's internal test record (department 'Test', team 'TestQueue')
+      and coalesce(trim(department), '') != 'Test'
 )
 
 select
