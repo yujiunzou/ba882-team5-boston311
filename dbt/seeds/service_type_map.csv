@@ -112,7 +112,7 @@ legacy:Notification,legacy,Notification,General & Other,from city reason: Notifi
 legacy:Phone Bank Service Inquiry,legacy,Phone Bank Service Inquiry,Parking & Vehicles,from city reason: Office of The Parking Clerk
 legacy:Walk-In Service Inquiry,legacy,Walk-In Service Inquiry,Parking & Vehicles,from city reason: Office of The Parking Clerk
 legacy:Pavement Marking Inspection,legacy,Pavement Marking Inspection,"Signs, Signals & Markings",from city reason: Operations
-legacy:Parking Meter Repairs,legacy,Parking Meter Repairs,"Signs, Signals & Markings",from city reason: Operations
+legacy:Parking Meter Repairs,legacy,Parking Meter Repairs,Parking & Vehicles,override: reason is Operations; matches new-system Parking Meter Repairs
 legacy:Sign Shop WO,legacy,Sign Shop WO,"Signs, Signals & Markings",from city reason: Operations
 legacy:Pavement Marking Maintenance,legacy,Pavement Marking Maintenance,"Signs, Signals & Markings",from city reason: Operations
 legacy:Ground Maintenance,legacy,Ground Maintenance,Parks & Cemeteries,from city reason: Park Maintenance & Safety
