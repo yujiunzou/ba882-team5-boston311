@@ -1,0 +1,17 @@
+version: 2
+
+exposures:
+  - name: boston311_service_dashboard
+    label: Boston 311 Service Dashboard
+    type: dashboard
+    maturity: low
+    description: >
+      Planned team dashboard on request volume, resolution time and overdue rates
+      by service type, department and neighborhood. Add the url once it is built.
+    depends_on:
+      - ref('fct_service_requests')
+      - ref('dim_service_type')
+      - ref('dim_department')
+      - ref('dim_neighborhood')
+    owner:
+      name: BA882 Team 5

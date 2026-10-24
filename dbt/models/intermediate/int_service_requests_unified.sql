@@ -88,7 +88,7 @@ combined as (
 )
 
 select
-    concat(source_system, ':', case_id)                          as service_request_key,
+    concat(combined.source_system, ':', combined.case_id)                          as service_request_key,
     combined.* replace (
         lpad(zip_code, 5, '0')                            as zip_code,  -- restore lost leading zero: 2135 -> 02135
         nullif(safe_cast(regexp_extract(ward, r'\d+') as int64), 0) as ward  -- 'Ward 7', '07', '7' -> 7; ward 0 = no ward -> NULL
@@ -108,5 +108,13 @@ select
         when is_status_current
             then current_datetime('America/New_York') > target_close_at
         else null
-    end                                                          as is_overdue
+    end                                                          as is_overdue,
+    -- readable department name (legacy codes mapped via seed; new-system names already readable)
+    coalesce(dm.department_name, combined.department, '(unknown)')      as department_name,
+    -- shared, coarser neighborhood level that both systems can be compared at
+    coalesce(nm.neighborhood_group, combined.neighborhood, '(unknown)') as neighborhood_group
 from combined
+left join {{ ref('department_map') }} as dm
+    on dm.source_system = combined.source_system and dm.department = combined.department
+left join {{ ref('neighborhood_map') }} as nm
+    on nm.neighborhood = combined.neighborhood

@@ -1,0 +1,39 @@
+version: 2
+
+seeds:
+  - name: department_map
+    description: >
+      Hand-maintained lookup from legacy department codes to readable names.
+      New-system names are already readable and are not listed. See the notes column for confidence.
+    config:
+      column_types:
+        source_system: string
+        department: string
+        department_name: string
+        notes: string
+    columns:
+      - name: department
+        data_tests:
+          - unique
+          - not_null
+      - name: department_name
+        data_tests:
+          - not_null
+
+  - name: neighborhood_map
+    description: >
+      Hand-maintained lookup from each system's neighborhood names to a shared, coarser
+      neighborhood_group that both systems can be compared at.
+    config:
+      column_types:
+        neighborhood: string
+        neighborhood_group: string
+        notes: string
+    columns:
+      - name: neighborhood
+        data_tests:
+          - unique
+          - not_null
+      - name: neighborhood_group
+        data_tests:
+          - not_null
