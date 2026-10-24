@@ -1,0 +1,52 @@
+version: 2
+
+models:
+  - name: fct_service_requests
+    description: One row per 311 service request across the legacy and new systems.
+    columns:
+      - name: service_request_key
+        data_tests: [unique, not_null]
+      - name: service_type_key
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_service_type')
+                field: service_type_key
+      - name: department_name
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_department')
+                field: department_name
+      - name: neighborhood_group
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_neighborhood')
+                field: neighborhood_group
+      - name: source_system
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['legacy', 'new']
+
+  - name: dim_service_type
+    description: One row per (source_system, service_type).
+    columns:
+      - name: service_type_key
+        data_tests: [unique, not_null]
+
+  - name: dim_department
+    description: One row per readable department name; source_department_values lists the original values mapped to it.
+    columns:
+      - name: department_name
+        data_tests: [unique, not_null]
+
+  - name: dim_neighborhood
+    description: One row per neighborhood_group; source_neighborhood_values lists the original values folded into it.
+    columns:
+      - name: neighborhood_group
+        data_tests: [unique, not_null]
