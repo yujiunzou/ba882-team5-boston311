@@ -89,7 +89,10 @@ combined as (
 
 select
     concat(source_system, ':', case_id)                          as service_request_key,
-    combined.*,
+    combined.* replace (
+        lpad(zip_code, 5, '0')                            as zip_code,  -- restore lost leading zero: 2135 -> 02135
+        nullif(safe_cast(regexp_extract(ward, r'\d+') as int64), 0) as ward  -- 'Ward 7', '07', '7' -> 7; ward 0 = no ward -> NULL
+    ),
     case when coalesce(case_status, '') = 'closed' then 'closed' else 'open' end as status_group,
     coalesce(case_status, '') = 'closed'                         as is_closed,
     date(opened_at)                                              as opened_date,
