@@ -37,3 +37,24 @@ seeds:
       - name: neighborhood_group
         data_tests:
           - not_null
+
+  - name: service_type_map
+    description: >
+      Hand-maintained lookup from each (source_system, service_type) to a shared service_category,
+      so legacy and new-system types can be compared. Legacy rows mostly follow the city's reason field;
+      the notes column explains overrides and checks.
+    config:
+      column_types:
+        service_type_key: string
+        source_system: string
+        service_type: string
+        service_category: string
+        notes: string
+    columns:
+      - name: service_type_key
+        data_tests:
+          - unique
+          - not_null
+      - name: service_category
+        data_tests:
+          - not_null
