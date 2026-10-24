@@ -11,9 +11,9 @@ legacy,ISD,Inspectional Services Department (ISD),legacy only - name from genera
 legacy,BWSC,Boston Water and Sewer Commission (BWSC),legacy only - name from general knowledge
 legacy,BHA,Boston Housing Authority (BHA),legacy only - name from general knowledge
 legacy,BPS,Boston Public Schools (BPS),legacy only - name from general knowledge
-legacy,GEN,GEN,unknown code - confirm
-legacy,DISB,DISB,unknown code - confirm
-legacy,DND,DND,unknown code - possibly Mayor's Office of Housing - confirm
-legacy,GRNi,GRNi,unknown code - confirm
-legacy,ECON,ECON,unknown code - confirm
+legacy,GEN,Needle Pickup Program (GEN),inferred from team GEN_Needle_Pickup (99.7% Needle Pickup)
+legacy,DISB,Disabilities Commission (DISB),inferred from teams DISB_HP Sign / DISB_Snow_HP_ParkingSpots
+legacy,DND,Department of Neighborhood Development (DND),inferred from code and team DND_General
+legacy,GRNi,Green Infrastructure (GRNi),inferred from team GRNi_Green_Infrastructure
+legacy,ECON,Economic Development - Outdoor Dining (ECON),inferred from team ECON_OutdoorDining
 legacy,Test,Test,test record
