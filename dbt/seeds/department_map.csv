@@ -1,0 +1,19 @@
+source_system,department,department_name,notes
+legacy,PWDx,Public Works Department (PWD),matches new-system name
+legacy,BTDT,Boston Transportation Department (BTD),matches new-system name
+legacy,PARK,Parks & Recreation,matches new-system name
+legacy,ANML,Animal Care & Control,matches new-system name
+legacy,BPD,Boston Police Department (BPD),matches new-system name
+legacy,INFO,Boston 311,inferred - confirm
+legacy,PROP,City of Boston Property Management,inferred - confirm
+legacy,ONS,Neighborhood Services,inferred - confirm
+legacy,ISD,Inspectional Services Department (ISD),legacy only - name from general knowledge
+legacy,BWSC,Boston Water and Sewer Commission (BWSC),legacy only - name from general knowledge
+legacy,BHA,Boston Housing Authority (BHA),legacy only - name from general knowledge
+legacy,BPS,Boston Public Schools (BPS),legacy only - name from general knowledge
+legacy,GEN,GEN,unknown code - confirm
+legacy,DISB,DISB,unknown code - confirm
+legacy,DND,DND,unknown code - possibly Mayor's Office of Housing - confirm
+legacy,GRNi,GRNi,unknown code - confirm
+legacy,ECON,ECON,unknown code - confirm
+legacy,Test,Test,test record
