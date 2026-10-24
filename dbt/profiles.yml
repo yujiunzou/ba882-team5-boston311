@@ -1,0 +1,23 @@
+# Team dbt connection settings. No secrets: login uses your own Google account (oauth).
+#   dev  -> your own dataset. Set it first:  export DBT_DEV_DATASET=boston311_<yourname>_dev
+#   prod -> the shared dataset the dashboard reads. Build it from up-to-date main only.
+# Run dbt from the dbt/ folder with:  --profiles-dir .
+boston311:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: oauth
+      project: ba882-team5-project
+      dataset: "{{ env_var('DBT_DEV_DATASET', 'boston311_dev') }}"
+      location: us-central1
+      threads: 4
+      timeout_seconds: 300
+    prod:
+      type: bigquery
+      method: oauth
+      project: ba882-team5-project
+      dataset: boston311_analytics
+      location: us-central1
+      threads: 4
+      timeout_seconds: 300
