@@ -112,9 +112,13 @@ select
     -- readable department name (legacy codes mapped via seed; new-system names already readable)
     coalesce(dm.department_name, combined.department, '(unknown)')      as department_name,
     -- shared, coarser neighborhood level that both systems can be compared at
-    coalesce(nm.neighborhood_group, combined.neighborhood, '(unknown)') as neighborhood_group
+    coalesce(nm.neighborhood_group, combined.neighborhood, '(unknown)') as neighborhood_group,
+    -- shared category so legacy and new-system types can be compared (service_type_map seed)
+    coalesce(st.service_category, 'Unmapped') as service_category
 from combined
 left join {{ ref('department_map') }} as dm
     on dm.source_system = combined.source_system and dm.department = combined.department
 left join {{ ref('neighborhood_map') }} as nm
     on nm.neighborhood = combined.neighborhood
+left join {{ ref('service_type_map') }} as st
+    on st.service_type_key = concat(combined.source_system, ':', coalesce(combined.service_type, '(unknown)'))

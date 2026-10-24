@@ -1,9 +1,9 @@
 neighborhood,neighborhood_group,notes
 Allston,Allston / Brighton,new-system fine area
 Allston / Brighton,Allston / Brighton,legacy combined area
-Back Bay,Back Bay,
-Bay Village,Back Bay,approximation - legacy labeled zip 02116 mostly Back Bay
-Beacon Hill,Beacon Hill,
+Back Bay,Back Bay / Bay Village,separate Boston neighborhoods; legacy files Bay Village under Back Bay (zip 02116)
+Bay Village,Back Bay / Bay Village,separate Boston neighborhoods; legacy files Bay Village under Back Bay (zip 02116)
+Beacon Hill,Beacon Hill / West End,separate Boston neighborhoods; legacy files West End under Beacon Hill (zip 02114)
 Boston,Boston (unspecified),legacy catch-all across many zip codes
 Brighton,Allston / Brighton,new-system fine area
 Charlestown,Charlestown,
@@ -29,5 +29,5 @@ South Boston,South Boston / South Boston Waterfront,
 South Boston / South Boston Waterfront,South Boston / South Boston Waterfront,legacy combined area
 South Boston Waterfront,South Boston / South Boston Waterfront,new-system fine area
 South End,South End,
-West End,Beacon Hill,approximation - legacy labeled zip 02114 mostly Beacon Hill
+West End,Beacon Hill / West End,separate Boston neighborhoods; legacy files West End under Beacon Hill (zip 02114)
 West Roxbury,West Roxbury,

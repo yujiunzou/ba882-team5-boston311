@@ -1,0 +1,256 @@
+service_type_key,source_system,service_type,service_category,notes
+legacy:Abandoned Bicycle,legacy,Abandoned Bicycle,Parking & Vehicles,from city reason: Abandoned Bicycle
+legacy:Follow-Up,legacy,Follow-Up,General & Other,from city reason: Administrative
+legacy:Public Works General Request,legacy,Public Works General Request,General & Other,from city reason: Administrative & General Requests
+legacy:Transportation General Request,legacy,Transportation General Request,General & Other,from city reason: Administrative & General Requests
+legacy:BWSC General Request,legacy,BWSC General Request,General & Other,from city reason: Administrative & General Requests
+legacy:Misc. Snow Complaint,legacy,Misc. Snow Complaint,Snow & Ice,override: reason is Administrative
+legacy:Parks General Request,legacy,Parks General Request,Parks & Cemeteries,override: reason is Administrative
+legacy:No-Tow Complaint Confirmation,legacy,No-Tow Complaint Confirmation,General & Other,from city reason: Administrative & General Requests
+legacy:Rooftop & Mechanical Disturbances,legacy,Rooftop & Mechanical Disturbances,Noise,from city reason: Air Pollution Control
+legacy:Animal Generic Request,legacy,Animal Generic Request,Animals,from city reason: Animal Issues
+legacy:Animal Noise Disturbances,legacy,Animal Noise Disturbances,Animals,from city reason: Animal Issues
+legacy:Billing Complaint,legacy,Billing Complaint,Water & Sewer,from city reason: Billing
+legacy:Bicycle Issues,legacy,Bicycle Issues,Streets & Sidewalks,from city reason: Boston Bikes
+legacy:Bridge Maintenance,legacy,Bridge Maintenance,Streets & Sidewalks,from city reason: Bridge Maintenance
+legacy:Work w/out Permit,legacy,Work w/out Permit,Housing & Building,from city reason: Building
+legacy:Contractors Complaint,legacy,Contractors Complaint,Housing & Building,from city reason: Building
+legacy:Working Beyond Hours,legacy,Working Beyond Hours,Housing & Building,from city reason: Building
+legacy:Building Inspection Request,legacy,Building Inspection Request,Housing & Building,from city reason: Building
+legacy:Electrical,legacy,Electrical,Housing & Building,from city reason: Building
+legacy:Unsafe Dangerous Conditions,legacy,Unsafe Dangerous Conditions,Housing & Building,from city reason: Building
+legacy:Protection of Adjoining Property,legacy,Protection of Adjoining Property,Housing & Building,from city reason: Building
+legacy:Maintenance - Homeowner,legacy,Maintenance - Homeowner,Housing & Building,from city reason: Building
+legacy:Exceeding Terms of Permit,legacy,Exceeding Terms of Permit,Housing & Building,from city reason: Building
+legacy:Illegal Occupancy,legacy,Illegal Occupancy,Housing & Building,from city reason: Building
+legacy:Egress,legacy,Egress,Housing & Building,from city reason: Building
+legacy:Illegal Rooming House,legacy,Illegal Rooming House,Housing & Building,from city reason: Building
+legacy:Plumbing,legacy,Plumbing,Housing & Building,from city reason: Building
+legacy:Zoning,legacy,Zoning,Housing & Building,from city reason: Building
+legacy:Mechanical,legacy,Mechanical,Housing & Building,from city reason: Building
+legacy:Occupying W/Out A Valid CO/CI,legacy,Occupying W/Out A Valid CO/CI,Housing & Building,from city reason: Building
+legacy:Illegal Use,legacy,Illegal Use,Housing & Building,from city reason: Building
+legacy:Catchbasin,legacy,Catchbasin,Water & Sewer,from city reason: Catchbasin
+legacy:Roadway Flooding,legacy,Roadway Flooding,Water & Sewer,from city reason: Catchbasin
+legacy:Cemetery Maintenance Request,legacy,Cemetery Maintenance Request,Parks & Cemeteries,from city reason: Cemetery
+legacy:Improper Storage of Trash (Barrels),legacy,Improper Storage of Trash (Barrels),Code Enforcement,
+legacy:Poor Conditions of Property,legacy,Poor Conditions of Property,Code Enforcement,from city reason: Code Enforcement
+legacy:Unshoveled Sidewalk,legacy,Unshoveled Sidewalk,Snow & Ice,override: reason is Code Enforcement
+legacy:Illegal Dumping,legacy,Illegal Dumping,Code Enforcement,from city reason: Code Enforcement
+legacy:Construction Debris,legacy,Construction Debris,Code Enforcement,from city reason: Code Enforcement
+legacy:Illegal Vending,legacy,Illegal Vending,Code Enforcement,from city reason: Code Enforcement
+legacy:Parking on Front/Back Yards (Illegal Parking),legacy,Parking on Front/Back Yards (Illegal Parking),Code Enforcement,from city reason: Code Enforcement
+legacy:Illegal Posting of Signs,legacy,Illegal Posting of Signs,Code Enforcement,from city reason: Code Enforcement
+legacy:General Comments For a Program or Policy,legacy,General Comments For a Program or Policy,General & Other,from city reason: Employee & General Comments
+legacy:General Comments For An Employee,legacy,General Comments For An Employee,General & Other,from city reason: Employee & General Comments
+legacy:Parking Enforcement,legacy,Parking Enforcement,Parking & Vehicles,from city reason: Enforcement & Abandoned Vehicles
+legacy:Abandoned Vehicles,legacy,Abandoned Vehicles,Parking & Vehicles,from city reason: Enforcement & Abandoned Vehicles
+legacy:Rodent Activity,legacy,Rodent Activity,Environmental & Health Inspections,from city reason: Environmental Services
+legacy:Illegal Auto Body Shop,legacy,Illegal Auto Body Shop,Environmental & Health Inspections,from city reason: Environmental Services
+legacy:Overflowing or Un-kept Dumpster,legacy,Overflowing or Un-kept Dumpster,Environmental & Health Inspections,from city reason: Environmental Services
+legacy:Abandoned Building,legacy,Abandoned Building,Environmental & Health Inspections,from city reason: Environmental Services
+legacy:Trash on Vacant Lot,legacy,Trash on Vacant Lot,Environmental & Health Inspections,from city reason: Environmental Services
+legacy:Pigeon Infestation,legacy,Pigeon Infestation,Environmental & Health Inspections,from city reason: Environmental Services
+legacy:Mosquitoes (West Nile),legacy,Mosquitoes (West Nile),Environmental & Health Inspections,
+legacy:Rat Bite,legacy,Rat Bite,Environmental & Health Inspections,from city reason: Environmental Services
+legacy:Fire Department Request,legacy,Fire Department Request,General & Other,from city reason: Fire Department
+legacy:Fire Hydrant,legacy,Fire Hydrant,Water & Sewer,from city reason: Fire Hydrant
+legacy:Student Move-in Issues,legacy,Student Move-in Issues,Trash & Recycling,override: paired with new-system Student Move-In (Trash Collection); mostly PWD Code Enforcement
+legacy:Undefined Noise Disturbance,legacy,Undefined Noise Disturbance,Noise,from city reason: Generic Noise Disturbance
+legacy:Graffiti Removal,legacy,Graffiti Removal,Graffiti,from city reason: Graffiti
+legacy:Unsanitary Conditions - Establishment,legacy,Unsanitary Conditions - Establishment,Environmental & Health Inspections,from city reason: Health
+legacy:Unsanitary Conditions - Food,legacy,Unsanitary Conditions - Food,Environmental & Health Inspections,from city reason: Health
+legacy:Food Alert - Confirmed,legacy,Food Alert - Confirmed,Environmental & Health Inspections,from city reason: Health
+legacy:Food Alert - Unconfirmed,legacy,Food Alert - Unconfirmed,Environmental & Health Inspections,from city reason: Health
+legacy:Unsanitary Conditions - Employees,legacy,Unsanitary Conditions - Employees,Environmental & Health Inspections,from city reason: Health
+legacy:Fire in Food Establishment,legacy,Fire in Food Establishment,Environmental & Health Inspections,from city reason: Health
+legacy:No Utilities - Food Establishment - Water,legacy,No Utilities - Food Establishment - Water,Environmental & Health Inspections,from city reason: Health
+legacy:No Utilities - Food Establishment - Sewer,legacy,No Utilities - Food Establishment - Sewer,Environmental & Health Inspections,from city reason: Health
+legacy:No Utilities - Food Establishment - Flood,legacy,No Utilities - Food Establishment - Flood,Environmental & Health Inspections,from city reason: Health
+legacy:No Utilities - Food Establishment - Electricity,legacy,No Utilities - Food Establishment - Electricity,Environmental & Health Inspections,from city reason: Health
+legacy:Boston Public Health Commission (BPHC),legacy,Boston Public Health Commission (BPHC),Environmental & Health Inspections,
+legacy:Request for Pothole Repair,legacy,Request for Pothole Repair,Streets & Sidewalks,from city reason: Highway Maintenance
+legacy:Sidewalk Repair (Make Safe),legacy,Sidewalk Repair (Make Safe),Streets & Sidewalks,from city reason: Highway Maintenance
+legacy:Empty Litter Basket,legacy,Empty Litter Basket,Trash & Recycling,override: matches new-system receptacle types
+legacy:Contractor Complaints,legacy,Contractor Complaints,Streets & Sidewalks,from city reason: Highway Maintenance
+legacy:PWD Graffiti,legacy,PWD Graffiti,Graffiti,override: reason is Highway Maintenance
+legacy:Roadway Repair,legacy,Roadway Repair,Streets & Sidewalks,from city reason: Highway Maintenance
+legacy:Utility Casting Repair,legacy,Utility Casting Repair,Streets & Sidewalks,from city reason: Highway Maintenance
+legacy:Work Hours-Loud Noise Complaints,legacy,Work Hours-Loud Noise Complaints,Noise,override: reason is Highway Maintenance
+legacy:Litter Basket Maintenance,legacy,Litter Basket Maintenance,Trash & Recycling,override: matches new-system receptacle types
+legacy:Sidewalk Repair,legacy,Sidewalk Repair,Streets & Sidewalks,from city reason: Highway Maintenance
+legacy:StreetLight Pole WO,legacy,StreetLight Pole WO,Street Lights,override: reason is Highway Maintenance
+legacy:News Boxes,legacy,News Boxes,Streets & Sidewalks,from city reason: Highway Maintenance
+legacy:Utility Call-In,legacy,Utility Call-In,Streets & Sidewalks,from city reason: Highway Maintenance
+legacy:Unsatisfactory Living Conditions,legacy,Unsatisfactory Living Conditions,Housing & Building,from city reason: Housing
+legacy:Pest Infestation - Residential,legacy,Pest Infestation - Residential,Housing & Building,from city reason: Housing
+legacy:Heat - Excessive  Insufficient,legacy,Heat - Excessive  Insufficient,Housing & Building,from city reason: Housing
+legacy:Maintenance Complaint - Residential,legacy,Maintenance Complaint - Residential,Housing & Building,from city reason: Housing
+legacy:Mice Infestation - Residential,legacy,Mice Infestation - Residential,Housing & Building,from city reason: Housing
+legacy:Chronic Dampness/Mold,legacy,Chronic Dampness/Mold,Housing & Building,from city reason: Housing
+legacy:Short Term Rental,legacy,Short Term Rental,Housing & Building,from city reason: Housing
+legacy:Unsatisfactory Utilities - Electrical  Plumbing,legacy,Unsatisfactory Utilities - Electrical  Plumbing,Housing & Building,from city reason: Housing
+legacy:Cross Metering - Sub-Metering,legacy,Cross Metering - Sub-Metering,Housing & Building,from city reason: Housing
+legacy:No Utilities Residential - Water,legacy,No Utilities Residential - Water,Housing & Building,from city reason: Housing
+legacy:Squalid Living Conditions,legacy,Squalid Living Conditions,Housing & Building,from city reason: Housing
+legacy:Bed Bugs,legacy,Bed Bugs,Housing & Building,from city reason: Housing
+legacy:No Utilities Residential - Electricity,legacy,No Utilities Residential - Electricity,Housing & Building,from city reason: Housing
+legacy:Sewage/Septic Back-Up,legacy,Sewage/Septic Back-Up,Housing & Building,from city reason: Housing
+legacy:Poor Ventilation,legacy,Poor Ventilation,Housing & Building,from city reason: Housing
+legacy:Overcrowding,legacy,Overcrowding,Housing & Building,from city reason: Housing
+legacy:No Utilities Residential - Gas,legacy,No Utilities Residential - Gas,Housing & Building,from city reason: Housing
+legacy:Rental Unit Delivery Conditions,legacy,Rental Unit Delivery Conditions,Housing & Building,from city reason: Housing
+legacy:Carbon Monoxide,legacy,Carbon Monoxide,Housing & Building,from city reason: Housing
+legacy:Lead,legacy,Lead,Housing & Building,from city reason: Housing
+legacy:Student Overcrowding,legacy,Student Overcrowding,Housing & Building,from city reason: Housing
+legacy:Aircraft Noise Disturbance,legacy,Aircraft Noise Disturbance,Noise,from city reason: Massport
+legacy:Needle Pickup,legacy,Needle Pickup,Needles & Encampments,from city reason: Needle Program
+legacy:Dumpster & Loading Noise Disturbances,legacy,Dumpster & Loading Noise Disturbances,Noise,from city reason: Neighborhood Services Issues
+legacy:Loud Parties/Music/People,legacy,Loud Parties/Music/People,Noise,from city reason: Noise Disturbance
+legacy:Automotive Noise Disturbance,legacy,Automotive Noise Disturbance,Noise,from city reason: Noise Disturbance
+legacy:Notification,legacy,Notification,General & Other,from city reason: Notification
+legacy:Phone Bank Service Inquiry,legacy,Phone Bank Service Inquiry,Parking & Vehicles,from city reason: Office of The Parking Clerk
+legacy:Walk-In Service Inquiry,legacy,Walk-In Service Inquiry,Parking & Vehicles,from city reason: Office of The Parking Clerk
+legacy:Pavement Marking Inspection,legacy,Pavement Marking Inspection,"Signs, Signals & Markings",from city reason: Operations
+legacy:Parking Meter Repairs,legacy,Parking Meter Repairs,Parking & Vehicles,override: reason is Operations; matches new-system Parking Meter Repairs
+legacy:Sign Shop WO,legacy,Sign Shop WO,"Signs, Signals & Markings",from city reason: Operations
+legacy:Pavement Marking Maintenance,legacy,Pavement Marking Maintenance,"Signs, Signals & Markings",from city reason: Operations
+legacy:Ground Maintenance,legacy,Ground Maintenance,Parks & Cemeteries,from city reason: Park Maintenance & Safety
+legacy:Equipment Repair,legacy,Equipment Repair,Parks & Cemeteries,from city reason: Park Maintenance & Safety
+legacy:Parks Lighting/Electrical Issues,legacy,Parks Lighting/Electrical Issues,Parks & Cemeteries,from city reason: Park Maintenance & Safety
+legacy:Park Improvement Requests,legacy,Park Improvement Requests,Parks & Cemeteries,from city reason: Park Maintenance & Safety
+legacy:Planting,legacy,Planting,Parks & Cemeteries,from city reason: Park Maintenance & Safety
+legacy:Capital Improvement Long Term,legacy,Capital Improvement Long Term,Parks & Cemeteries,from city reason: Park Maintenance & Safety
+legacy:Municipal Parking Lot Complaints,legacy,Municipal Parking Lot Complaints,Parking & Vehicles,from city reason: Parking Complaints
+legacy:Private Parking Lot Complaints,legacy,Private Parking Lot Complaints,Parking & Vehicles,from city reason: Parking Complaints
+legacy:BWSC Pothole,legacy,BWSC Pothole,Streets & Sidewalks,from city reason: Pothole
+legacy:City/State Snow Issues,legacy,City/State Snow Issues,Snow & Ice,override: reason is Programs
+legacy:State/Cass Shelter Sites,legacy,State/Cass Shelter Sites,General & Other,from city reason: Programs
+legacy:Encampments,legacy,Encampments,Needles & Encampments,from city reason: Quality of Life
+legacy:Request for Recycling Cart,legacy,Request for Recycling Cart,Trash & Recycling,from city reason: Recycling
+legacy:Recycling Cart Return,legacy,Recycling Cart Return,Trash & Recycling,from city reason: Recycling
+legacy:Sticker Request,legacy,Sticker Request,Trash & Recycling,from city reason: Recycling
+legacy:Big Buildings Recycling (INTERNAL),legacy,Big Buildings Recycling (INTERNAL),Trash & Recycling,from city reason: Recycling
+legacy:Missed Trash/Recycling/Yard Waste/Bulk Item,legacy,Missed Trash/Recycling/Yard Waste/Bulk Item,Trash & Recycling,from city reason: Sanitation
+legacy:Schedule a Bulk Item Pickup,legacy,Schedule a Bulk Item Pickup,Trash & Recycling,from city reason: Sanitation
+legacy:Mattress_Pickup,legacy,Mattress_Pickup,Trash & Recycling,from city reason: Sanitation
+legacy:Schedule a Bulk Item Pickup SS,legacy,Schedule a Bulk Item Pickup SS,Trash & Recycling,from city reason: Sanitation
+legacy:Space Savers,legacy,Space Savers,Trash & Recycling,from city reason: Sanitation
+legacy:Sidewalk Cover / Manhole,legacy,Sidewalk Cover / Manhole,Streets & Sidewalks,from city reason: Sidewalk Cover / Manhole
+legacy:Sign Repair,legacy,Sign Repair,"Signs, Signals & Markings",from city reason: Signs & Signals
+legacy:Traffic Signal Inspection,legacy,Traffic Signal Inspection,"Signs, Signals & Markings",from city reason: Signs & Signals
+legacy:New Sign  Crosswalk or Pavement Marking,legacy,New Sign  Crosswalk or Pavement Marking,"Signs, Signals & Markings",from city reason: Signs & Signals
+legacy:Missing Sign,legacy,Missing Sign,"Signs, Signals & Markings",from city reason: Signs & Signals
+legacy:Traffic Signal Repair,legacy,Traffic Signal Repair,"Signs, Signals & Markings",from city reason: Signs & Signals
+legacy:Requests for Street Cleaning,legacy,Requests for Street Cleaning,Street Cleaning & Litter,from city reason: Street Cleaning
+legacy:CE Collection,legacy,CE Collection,Code Enforcement,override: reason is Street Cleaning; paired with new-system Code Enforcement Collection (both mostly PWD district/highway crews)
+legacy:Pick up Dead Animal,legacy,Pick up Dead Animal,Animals,override: reason is Street Cleaning
+legacy:Request for Snow Plowing,legacy,Request for Snow Plowing,Snow & Ice,override: reason is Street Cleaning
+legacy:Request for Litter Basket Installation,legacy,Request for Litter Basket Installation,Trash & Recycling,override: matches new-system receptacle types
+legacy:Request for Snow Plowing (Emergency Responder),legacy,Request for Snow Plowing (Emergency Responder),Snow & Ice,override: reason is Street Cleaning
+legacy:Snow/Ice Control,legacy,Snow/Ice Control,Snow & Ice,override: reason is Street Cleaning
+legacy:Street Light Outages,legacy,Street Light Outages,Street Lights,from city reason: Street Lights
+legacy:General Lighting Request,legacy,General Lighting Request,Street Lights,from city reason: Street Lights
+legacy:Street Light Knock Downs,legacy,Street Light Knock Downs,Street Lights,from city reason: Street Lights
+legacy:Major System Failure,legacy,Major System Failure,Street Lights,from city reason: Street Lights
+legacy:Knockdown Replacement,legacy,Knockdown Replacement,Street Lights,from city reason: Street Lights
+legacy:Pole Compliance,legacy,Pole Compliance,Street Lights,from city reason: Street Lights
+legacy:Install New Lighting,legacy,Install New Lighting,Street Lights,from city reason: Street Lights
+legacy:Upgrade Existing Lighting,legacy,Upgrade Existing Lighting,Street Lights,from city reason: Street Lights
+legacy:Pickup/Clear Conduit,legacy,Pickup/Clear Conduit,Street Lights,from city reason: Street Lights
+legacy:Requests for Traffic Signal Studies or Reviews,legacy,Requests for Traffic Signal Studies or Reviews,"Signs, Signals & Markings",from city reason: Traffic Management & Engineering
+legacy:General Traffic Engineering Request,legacy,General Traffic Engineering Request,"Signs, Signals & Markings",from city reason: Traffic Management & Engineering
+legacy:Requests for Directional or Roadway Changes,legacy,Requests for Directional or Roadway Changes,"Signs, Signals & Markings",from city reason: Traffic Management & Engineering
+legacy:Tree Maintenance Requests,legacy,Tree Maintenance Requests,Trees,from city reason: Trees
+legacy:New Tree Requests,legacy,New Tree Requests,Trees,from city reason: Trees
+legacy:Tree Emergencies,legacy,Tree Emergencies,Trees,from city reason: Trees
+legacy:Tree in Park,legacy,Tree in Park,Trees,from city reason: Trees
+legacy:Valet Parking Problems,legacy,Valet Parking Problems,Parking & Vehicles,from city reason: Valet
+legacy:Scanning Overcharge,legacy,Scanning Overcharge,General & Other,from city reason: Weights and Measures
+legacy:Item Price Missing,legacy,Item Price Missing,General & Other,from city reason: Weights and Measures
+legacy:Unit Pricing Wrong/Missing,legacy,Unit Pricing Wrong/Missing,General & Other,from city reason: Weights and Measures
+legacy:Short Measure - Gas,legacy,Short Measure - Gas,General & Other,from city reason: Weights and Measures
+legacy:No Price on Gas/Wrong Price,legacy,No Price on Gas/Wrong Price,General & Other,from city reason: Weights and Measures
+legacy:Product Short Measure,legacy,Product Short Measure,General & Other,from city reason: Weights and Measures
+legacy:Scale Not Visible,legacy,Scale Not Visible,General & Other,from city reason: Weights and Measures
+legacy:Water in Gas - High Priority,legacy,Water in Gas - High Priority,General & Other,from city reason: Weights and Measures
+legacy:Oil Truck - No Receipt,legacy,Oil Truck - No Receipt,General & Other,from city reason: Weights and Measures
+legacy:Oil Truck - No Price Per Gallon,legacy,Oil Truck - No Price Per Gallon,General & Other,from city reason: Weights and Measures
+legacy:Oil Truck - Short Measure,legacy,Oil Truck - Short Measure,General & Other,from city reason: Weights and Measures
+new:Litter & Debris,new,Litter & Debris,Street Cleaning & Litter,
+new:Domestic Animal Issue,new,Domestic Animal Issue,Animals,
+new:Street Light Outage,new,Street Light Outage,Street Lights,
+new:Missed Waste Pick-up,new,Missed Waste Pick-up,Trash & Recycling,
+new:Improper Trash Storage,new,Improper Trash Storage,Code Enforcement,
+new:Dead Animal General,new,Dead Animal General,Animals,
+new:Wild Animal Issue,new,Wild Animal Issue,Animals,
+new:Illegal Dumping or Disposal,new,Illegal Dumping or Disposal,Code Enforcement,
+new:Trash Placed Out Early,new,Trash Placed Out Early,Code Enforcement,
+new:Fallen Tree or Branches,new,Fallen Tree or Branches,Trees,
+new:Sidewalk Repair,new,Sidewalk Repair,Streets & Sidewalks,
+new:Pruning Request,new,Pruning Request,Trees,
+new:Pothole,new,Pothole,Streets & Sidewalks,
+new:Overflowing Trash,new,Overflowing Trash,Trash & Recycling,
+new:Park Groundskeeping,new,Park Groundskeeping,Parks & Cemeteries,
+new:Illegally Blocked Sidewalk,new,Illegally Blocked Sidewalk,Code Enforcement,checked: ~90% assigned to PWD Code Enforcement
+new:Other,new,Other,General & Other,
+new:Illegal Parking,new,Illegal Parking,Parking & Vehicles,
+new:Tree or Stump Removal,new,Tree or Stump Removal,Trees,
+new:Broken Park Equipment,new,Broken Park Equipment,Parks & Cemeteries,
+new:Needle Pickup,new,Needle Pickup,Needles & Encampments,
+new:Overgrown Weeds,new,Overgrown Weeds,Code Enforcement,checked: assigned to PWD Code Enforcement
+new:Illegal Graffiti,new,Illegal Graffiti,Graffiti,
+new:Utility Contractor Complaints,new,Utility Contractor Complaints,Streets & Sidewalks,
+new:Street Light Other,new,Street Light Other,Street Lights,
+new:Street Light Knockdown,new,Street Light Knockdown,Street Lights,
+new:Sticker Request,new,Sticker Request,Trash & Recycling,
+new:Construction Debris,new,Construction Debris,Code Enforcement,
+new:Planting Request,new,Planting Request,Trees,
+new:Unauthorized Signage,new,Unauthorized Signage,Code Enforcement,
+new:Parks General Request,new,Parks General Request,Parks & Cemeteries,
+new:Lost Pet,new,Lost Pet,Animals,
+new:Park Litter & Debris,new,Park Litter & Debris,Parks & Cemeteries,
+new:Ballfield Issue,new,Ballfield Issue,Parks & Cemeteries,
+new:Student Move-In (Trash Collection),new,Student Move-In (Trash Collection),Trash & Recycling,paired with legacy Student Move-in Issues; mostly PWD Code Enforcement
+new:Traffic Signal Request,new,Traffic Signal Request,"Signs, Signals & Markings",
+new:Missing / Knocked Down Sign,new,Missing / Knocked Down Sign,"Signs, Signals & Markings",
+new:Park Overflowing Trash Can,new,Park Overflowing Trash Can,Parks & Cemeteries,
+new:Unauthorized Vending,new,Unauthorized Vending,Code Enforcement,
+new:Broken Public Waste Receptacle,new,Broken Public Waste Receptacle,Trash & Recycling,
+new:Park Light Outage,new,Park Light Outage,Parks & Cemeteries,
+new:New / Modified Sign Request,new,New / Modified Sign Request,"Signs, Signals & Markings",
+new:Code Enforcement Collection,new,Code Enforcement Collection,Code Enforcement,paired with legacy CE Collection
+new:Park Dead Animal,new,Park Dead Animal,Animals,animals over parks for consistency
+new:Abandoned Vehicles,new,Abandoned Vehicles,Parking & Vehicles,
+new:Park Graffiti,new,Park Graffiti,Graffiti,graffiti over parks for consistency
+new:Park Suggestions,new,Park Suggestions,Parks & Cemeteries,
+new:Illegal Yard Parking,new,Illegal Yard Parking,Code Enforcement,
+new:Request New Public Waste Receptacle,new,Request New Public Waste Receptacle,Trash & Recycling,
+new:(unknown),new,(unknown),(unknown),blank service type
+new:Install New Signal,new,Install New Signal,"Signs, Signals & Markings",
+new:Request New Markings,new,Request New Markings,"Signs, Signals & Markings",
+new:Crosswalk Maintenance,new,Crosswalk Maintenance,"Signs, Signals & Markings",
+new:Locked Gates,new,Locked Gates,Parks & Cemeteries,
+new:Street Light Electrical Safety,new,Street Light Electrical Safety,Street Lights,
+new:Traffic Signal Knockdown,new,Traffic Signal Knockdown,"Signs, Signals & Markings",
+new:General Emergency,new,General Emergency,General & Other,
+new:Road Marking Maintenance,new,Road Marking Maintenance,"Signs, Signals & Markings",
+new:Utility Casting Repair,new,Utility Casting Repair,Streets & Sidewalks,
+new:Cemetery Maintenance,new,Cemetery Maintenance,Parks & Cemeteries,
+new:Missing Manhole Cover,new,Missing Manhole Cover,Streets & Sidewalks,
+new:Dropped Personal Item,new,Dropped Personal Item,General & Other,
+new:Lane Divider,new,Lane Divider,"Signs, Signals & Markings",
+new:Fences/Guardrails/Bollards,new,Fences/Guardrails/Bollards,Streets & Sidewalks,
+new:Request New Crosswalk,new,Request New Crosswalk,"Signs, Signals & Markings",
+new:Parking Meter Repairs,new,Parking Meter Repairs,Parking & Vehicles,
+new:Municipal Lots,new,Municipal Lots,Parking & Vehicles,
+new:Bridge Maintenance,new,Bridge Maintenance,Streets & Sidewalks,
+new:PWD General,new,PWD General,General & Other,
+new:Knocked Down Sign,new,Knocked Down Sign,"Signs, Signals & Markings",
+new:Damaged/Faded Sign,new,Damaged/Faded Sign,"Signs, Signals & Markings",
+new:OPC Public Inquiry,new,OPC Public Inquiry,Parking & Vehicles,OPC = Office of the Parking Clerk
+new:Emergency Responder Snow Plowing,new,Emergency Responder Snow Plowing,Snow & Ice,
+new:Displacement Emergency,new,Displacement Emergency,General & Other,
+new:Moving Permits,new,Moving Permits,Parking & Vehicles,
+new:Snow Plowing,new,Snow Plowing,Snow & Ice,
+new:News Boxes,new,News Boxes,Streets & Sidewalks,

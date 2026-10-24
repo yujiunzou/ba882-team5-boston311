@@ -38,6 +38,15 @@ models:
     columns:
       - name: service_type_key
         data_tests: [unique, not_null]
+      - name: service_category
+        description: Shared category from the service_type_map seed. 'Unmapped' means a new type needs a seed row.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["Animals", "Code Enforcement", "Environmental & Health Inspections", "General & Other", "Graffiti", "Housing & Building", "Needles & Encampments", "Noise", "Parking & Vehicles", "Parks & Cemeteries", "Signs, Signals & Markings", "Snow & Ice", "Street Cleaning & Litter", "Street Lights", "Streets & Sidewalks", "Trash & Recycling", "Trees", "Water & Sewer", "(unknown)"]
+              config:
+                severity: warn
 
   - name: dim_department
     description: One row per readable department name; source_department_values lists the original values mapped to it.
