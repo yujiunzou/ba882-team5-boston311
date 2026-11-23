@@ -2,3 +2,4 @@ apache-airflow-providers-google
 google-cloud-storage
 requests
 astro-run-dag
+astronomer-cosmos

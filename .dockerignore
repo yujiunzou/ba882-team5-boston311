@@ -1,9 +1,29 @@
-astro
+# Git and Astro local files
 .git
-.env
+astro
 airflow_settings.yaml
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+include/gcp/
+ba882-team5-project.json
+**/ba882-team5-project.json
+sa-key.json
+**/sa-key.json
+
+# Local Airflow and Python files
 logs/
 .venv
 airflow.db
 airflow.cfg
-include/gcp/
+__pycache__/
+**/__pycache__/
+**/*.pyc
+
+# dbt generated files
+dbt/target/
+dbt/logs/
+dbt/dbt_packages/
+dbt/.user.yml

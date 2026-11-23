@@ -1,46 +1,27 @@
+# Python cache and virtual environments
 __pycache__/
 *.pyc
 .venv/
 venv/
+
+# Local Airflow files
 airflow.db
 airflow.cfg
 logs/
+
 # Local datasets
 data/raw/
 
 # Environment variables and secrets
 .env
-.claude
-.env
 .env.*
 !.env.example
-sa-key.json
-ba882-team5-project.json
-**/ba882-team5-project.json__pycache__/
-*.pyc
-.venv/
-venv/
-airflow.db
-airflow.cfg
-logs/
-# Local datasets
-data/raw/
-
-# Environment variables and secrets
-.env
 .claude
-.env
-.env.*
-!.env.example
 sa-key.json
 ba882-team5-project.json
 **/ba882-team5-project.json
+include/gcp/
 
-# Python cache
-__pycache__/
-*.pyc
-.venv/
-ba882-team5-project.json
 # Astro generated files
 .astro/standalone/
 .astro/config.yaml.lock
@@ -59,4 +40,9 @@ reports/311_values_full.txt
 
 # Other local files
 .yaml
-include/gcp/
+
+# dbt generated files
+dbt/target/
+dbt/logs/
+dbt/dbt_packages/
+dbt/.user.yml

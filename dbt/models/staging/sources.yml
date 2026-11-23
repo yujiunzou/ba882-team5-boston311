@@ -5,7 +5,7 @@ sources:
   - name: boston311_raw
     description: Raw Boston 311 data loaded by Airflow.
     database: ba882-team5-project
-    schema: boston311
+    schema: "{{ env_var('BQ_DATASET', 'boston311') }}"
 
     tables:
       - name: raw_legacy_311

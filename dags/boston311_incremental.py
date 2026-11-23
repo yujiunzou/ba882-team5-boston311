@@ -21,6 +21,7 @@ from datetime import timedelta
 import pendulum
 import requests
 from airflow.sdk import dag, task
+from airflow.providers.standard.operators.trigger_dagrun import TriggerDagRunOperator
 from google.cloud import bigquery, storage
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
@@ -276,15 +277,44 @@ def boston311_incremental():
     # 4. Task dependencies
     # ==================================================
 
-    for system in SYSTEMS:
-        ready = create_raw_table.override(task_id=f"create_{system}_raw_table")(system)
+    load_tasks = []
 
-        new_file = extract_new_cases.override(task_id=f"extract_{system}_new_cases")(system)
-        open_file = extract_open_cases.override(task_id=f"extract_{system}_open_cases")(system)
+    for system in SYSTEMS:
+        ready = create_raw_table.override(
+            task_id=f"create_{system}_raw_table"
+        )(system)
+
+        new_file = extract_new_cases.override(
+            task_id=f"extract_{system}_new_cases"
+        )(system)
+
+        open_file = extract_open_cases.override(
+            task_id=f"extract_{system}_open_cases"
+        )(system)
+
         ready >> [new_file, open_file]
 
-        load_to_raw.override(task_id=f"load_{system}_new_cases")(system, new_file)
-        load_to_raw.override(task_id=f"load_{system}_open_cases")(system, open_file)
+        load_new = load_to_raw.override(
+            task_id=f"load_{system}_new_cases"
+        )(system, new_file)
+
+        load_open = load_to_raw.override(
+            task_id=f"load_{system}_open_cases"
+        )(system, open_file)
+
+        load_tasks.extend([load_new, load_open])
+
+    # Trigger dbt after all raw data loads succeed
+    trigger_dbt = TriggerDagRunOperator(
+        task_id="trigger_dbt",
+        trigger_dag_id="boston311_dbt",
+        trigger_rule="all_success",
+        wait_for_completion=False,
+        retries=0,
+    )
+
+    for load_task in load_tasks:
+        load_task >> trigger_dbt
 
 
 boston311_incremental()
